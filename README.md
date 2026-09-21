@@ -52,6 +52,22 @@ docker compose up --build
 
 ---
 
+## Проверка API без внешних сервисов
+
+Из корня репозитория, в активированном виртуальном окружении:
+
+```bash
+python -m pip install -r currency_converter/requirements/requirements.test.txt
+cd currency_converter
+python -m django test tests --settings=tests.settings
+```
+
+Тесты проверяют обязательные параметры, валюты, положительные конечные
+суммы и поддержку десятичной запятой. Вызов поставщика курсов заменён
+тестовой функцией; PostgreSQL, Redis и ключ API не нужны. Версии тестовых
+зависимостей берутся из production requirements. Ошибочные параметры
+возвращают HTTP 400 до обращения к поставщику курсов.
+
 ## Зачем в портфолио
 
 - Командный хакатон end-to-end  

@@ -25,9 +25,9 @@ class CurrencyView(APIView):
         )
         serializer.is_valid(raise_exception=True)
 
-        from_param = request.query_params['from'].upper()
-        to_param = request.query_params['to'].upper()
-        amount_param = (request.query_params['amount']).replace(',', '.')
+        from_param = serializer.validated_data['from']
+        to_param = serializer.validated_data['to']
+        amount_param = serializer.validated_data['amount']
 
         result = convert(
             from_param, to_param, amount_param
