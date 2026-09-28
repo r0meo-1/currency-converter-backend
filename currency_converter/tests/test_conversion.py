@@ -70,3 +70,19 @@ class ConversionInputTests(SimpleTestCase):
                 self.assertEqual(response.json()['result'],
                                  float(Decimal(normalized) * 2))
                 self.assertEqual(response.json()['query'], params)
+
+    def test_finite_amount_with_overflowing_result_is_rejected(self):
+        response = self.client.get('/convert/', {
+            'from': 'USD', 'to': 'EUR', 'amount': '1e308',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.converter.assert_called_once_with('USD', 'EUR', '1e308')
+        self.assertIn('Уменьшите сумму', response.json()[0])
+
+    def test_large_json_safe_result_remains_supported(self):
+        response = self.client.get('/convert/', {
+            'from': 'USD', 'to': 'EUR', 'amount': '5e307',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['result'], 1e308)
+        self.assertEqual(response.json()['info']['rate'], 2)
