@@ -1,6 +1,8 @@
 from decimal import Decimal
+from math import isfinite
 
 from external_currency.freecurrencyapi import convert
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -25,13 +27,18 @@ class CurrencyView(APIView):
         )
         serializer.is_valid(raise_exception=True)
 
-        from_param = request.query_params['from'].upper()
-        to_param = request.query_params['to'].upper()
-        amount_param = (request.query_params['amount']).replace(',', '.')
+        from_param = serializer.validated_data['from']
+        to_param = serializer.validated_data['to']
+        amount_param = serializer.validated_data['amount']
 
         result = convert(
             from_param, to_param, amount_param
         )
+        # DRF renders Decimal as float, which can overflow after conversion.
+        if not isfinite(float(result)):
+            raise ValidationError(
+                'Результат выходит за допустимый диапазон. Уменьшите сумму.'
+            )
         return Response(
             {
                 'info': {

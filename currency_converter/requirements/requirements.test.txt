@@ -1,0 +1,8 @@
+# Use production versions without requiring PostgreSQL or Redis for API tests.
+-c requirements.txt
+Django
+djangorestframework
+drf-spectacular
+requests
+python-dotenv
+celery

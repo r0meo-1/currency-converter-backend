@@ -1,3 +1,4 @@
+from math import isfinite
 from typing import Union
 
 from rest_framework import serializers
@@ -21,7 +22,7 @@ class CurrencySerializer(serializers.Serializer):
     def validate(self, data: dict) -> dict:
         out = self.context['params'].get('from')
         to = self.context['params'].get('to')
-        amount = (self.context['params'].get('amount')).replace(',', '.')
+        amount = self.context['params'].get('amount')
         # проверяем наличие параметра: валюта из
         if not out:
             raise serializers.ValidationError('Введите параметр from')
@@ -37,13 +38,17 @@ class CurrencySerializer(serializers.Serializer):
         # проверяем наличие параметра: кол-во
         if not amount:
             raise serializers.ValidationError('Введите параметр amount')
+        amount = amount.replace(',', '.')
         # проверяем тип и значение = число > 0
         try:
-            float(amount)
+            numeric_amount = float(amount)
         except ValueError:
             raise serializers.ValidationError(
                 'Количество должно быть числом')
-        if float(amount) <= 0:
+        if not isfinite(numeric_amount):
+            raise serializers.ValidationError(
+                'Количество должно быть конечным числом')
+        if numeric_amount <= 0:
             raise serializers.ValidationError(
                 'Количество должно быть больше 0')
-        return data
+        return {'from': out.upper(), 'to': to.upper(), 'amount': amount}
