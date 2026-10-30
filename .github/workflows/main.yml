@@ -76,7 +76,8 @@ jobs:
     needs:
       - build_backend_and_push_to_docker_hub
       - build_gateway_and_push_to_docker_hub
-    if: github.ref == 'refs/heads/main'
+    # VPS temporarily off: keep tests and image builds running.
+    if: false # Resume the original main-branch condition when VPS is available.
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
